@@ -1,0 +1,6 @@
+task.md
+/generated/prisma
+node_modules
+dist/
+.env
+.vscode
