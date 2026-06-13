@@ -101,8 +101,8 @@ src/
 
 | Decision | Choice | Reason |
 |---|---|---|
-| ORM | Prisma over TypeORM | Better DX, type-safe queries, cleaner schema management |
-| Auth | JWT over Session | Stateless, fits REST principles, scalable |
+| ORM | Prisma | Type-safe queries, clean schema management, auto-generated client |
+| Auth | JWT | Stateless, fits REST principles, scalable |
 | Validation | class-validator | Declarative, integrates natively with NestJS pipes |
 | Testing | Jest + Supertest | Built-in to NestJS, industry standard for e2e |
 | Pattern | Repository Pattern | Separates business logic from data access, making each layer independently testable |
@@ -147,11 +147,17 @@ pnpm install
 ```bash
 cp .env.example .env
 ```
-Open `docker-compose.yml` to find DB credentials (`POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`), then fill in `.env`:
+Fill in `.env` with your values:
 ```dotenv
-DATABASE_URL="postgresql://postgres:password@localhost:5432/blog_post_db"
-JWT_SECRET="secret"
-JWT_EXPIRES_IN="1h"
+POSTGRES_USER=<your_db_user>
+POSTGRES_PASSWORD=<your_db_password>
+POSTGRES_DB=<your_db_name>
+
+DATABASE_URL="postgresql://<your_db_user>:<your_db_password>@localhost:5432/<your_db_name>"
+PORT=3000
+
+JWT_SECRET=<your_jwt_secret>
+JWT_EXPIRES_IN=<1h>
 ```
 
 **4. Start PostgreSQL**
@@ -161,7 +167,7 @@ docker compose up -d
 
 **5. Run database migrations**
 ```bash
-pnpm prisma migrate deploy
+pnpm prisma migrate dev
 ```
 
 **6. Start the server**
