@@ -1,36 +1,22 @@
-import {
-  Injectable,
-  NotFoundException,
-  ForbiddenException,
-} from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { PostsRepository } from './posts.repository';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 
 @Injectable()
 export class PostsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private postsRepository: PostsRepository) {}
 
   create(dto: CreatePostDto, authorId: number) {
-    return this.prisma.post.create({
-      data: {
-        ...dto,
-        authorId,
-      },
-    });
+    return this.postsRepository.create(dto, authorId);
   }
 
   findAll() {
-    return this.prisma.post.findMany({
-      include: { author: { select: { id: true, name: true, email: true } } },
-    });
+    return this.postsRepository.findAll();
   }
 
   async findOne(id: number) {
-    const post = await this.prisma.post.findUnique({
-      where: { id },
-      include: { author: { select: { id: true, name: true, email: true } } },
-    });
+    const post = await this.postsRepository.findById(id);
 
     if (!post) {
       throw new NotFoundException('Post not found');
@@ -40,7 +26,7 @@ export class PostsService {
   }
 
   async update(id: number, dto: UpdatePostDto, userId: number) {
-    const post = await this.prisma.post.findUnique({ where: { id } });
+    const post = await this.postsRepository.findById(id);
 
     if (!post) {
       throw new NotFoundException('Post not found');
@@ -50,14 +36,11 @@ export class PostsService {
       throw new ForbiddenException('You can only update your own posts');
     }
 
-    return this.prisma.post.update({
-      where: { id },
-      data: dto,
-    });
+    return this.postsRepository.update(id, dto);
   }
 
   async remove(id: number, userId: number) {
-    const post = await this.prisma.post.findUnique({ where: { id } });
+    const post = await this.postsRepository.findById(id);
 
     if (!post) {
       throw new NotFoundException('Post not found');
@@ -67,6 +50,6 @@ export class PostsService {
       throw new ForbiddenException('You can only delete your own posts');
     }
 
-    return this.prisma.post.delete({ where: { id } });
+    return this.postsRepository.remove(id);
   }
 }
