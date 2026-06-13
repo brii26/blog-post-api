@@ -18,6 +18,6 @@ export class UsersService {
 
   async update(id: number, dto: UpdateUserDto) {
     await this.findOne(id);
-	return this.usersRepository.update(id, dto);
+    return this.usersRepository.update(id, dto);
   }
 }

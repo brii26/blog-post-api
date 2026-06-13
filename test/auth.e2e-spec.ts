@@ -35,8 +35,9 @@ describe('Auth (e2e)', () => {
         .send(testUser)
         .expect(201)
         .expect((res) => {
-          expect(res.body.email).toBe(testUser.email);
-          expect(res.body.password).toBeUndefined();
+          const body = res.body as { email: string; password?: string };
+          expect(body.email).toBe(testUser.email);
+          expect(body.password).toBeUndefined();
         });
     });
 
@@ -65,8 +66,9 @@ describe('Auth (e2e)', () => {
         .send({ email: testUser.email, password: testUser.password })
         .expect(200)
         .expect((res) => {
-          expect(res.body.access_token).toBeDefined();
-          accessToken = res.body.access_token;
+          const body = res.body as { access_token: string };
+          expect(body.access_token).toBeDefined();
+          accessToken = body.access_token;
         });
     });
 

@@ -36,14 +36,14 @@ describe('Posts (e2e)', () => {
     const loginA = await request(app.getHttpServer())
       .post('/auth/login')
       .send({ email: userA.email, password: userA.password });
-    tokenA = loginA.body.access_token;
+    tokenA = (loginA.body as { access_token: string }).access_token;
 
     // register & login user B (bukan pemilik, buat test ownership)
     await request(app.getHttpServer()).post('/auth/register').send(userB);
     const loginB = await request(app.getHttpServer())
       .post('/auth/login')
       .send({ email: userB.email, password: userB.password });
-    tokenB = loginB.body.access_token;
+    tokenB = (loginB.body as { access_token: string }).access_token;
   });
 
   afterAll(async () => {
@@ -67,9 +67,14 @@ describe('Posts (e2e)', () => {
         .send({ title: 'My First Post', content: 'Hello world' })
         .expect(201)
         .expect((res) => {
-          expect(res.body.title).toBe('My First Post');
-          expect(res.body.authorId).toBeDefined();
-          postId = res.body.id;
+          const body = res.body as {
+            title: string;
+            authorId: number;
+            id: number;
+          };
+          expect(body.title).toBe('My First Post');
+          expect(body.authorId).toBeDefined();
+          postId = body.id;
         });
     });
 
@@ -104,8 +109,9 @@ describe('Posts (e2e)', () => {
         .set('Authorization', `Bearer ${tokenA}`)
         .expect(200)
         .expect((res) => {
-          expect(res.body.id).toBe(postId);
-          expect(res.body.author).toBeDefined();
+          const body = res.body as { id: number; author: unknown };
+          expect(body.id).toBe(postId);
+          expect(body.author).toBeDefined();
         });
     });
 
@@ -127,7 +133,7 @@ describe('Posts (e2e)', () => {
         .send({ title: 'Updated Title' })
         .expect(200)
         .expect((res) => {
-          expect(res.body.title).toBe('Updated Title');
+          expect((res.body as { title: string }).title).toBe('Updated Title');
         });
     });
 

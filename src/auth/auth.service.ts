@@ -28,13 +28,12 @@ export class AuthService {
 
     // masuk database
     const user = await this.usersRepository.create({
-        email: dto.email,
-        password: hashedPassword,
-        name: dto.name,
+      email: dto.email,
+      password: hashedPassword,
+      name: dto.name,
     });
 
-    // exclude password
-    const { password, ...result } = user;
+    const { password: _, ...result } = user;
     return result;
   }
 

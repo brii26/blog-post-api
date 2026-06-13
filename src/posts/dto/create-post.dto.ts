@@ -1,5 +1,5 @@
 import { IsString, IsOptional, IsBoolean } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger'
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreatePostDto {
   @ApiProperty({ example: 'My First Post' })
@@ -11,7 +11,7 @@ export class CreatePostDto {
   @IsString()
   content?: string;
 
-	@ApiProperty({ example: true, required: false })
+  @ApiProperty({ example: true, required: false })
   @IsOptional()
   @IsBoolean()
   published?: boolean;

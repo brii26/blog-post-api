@@ -9,7 +9,7 @@ import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
-	UsersModule,
+    UsersModule,
     PassportModule,
     JwtModule.registerAsync({
       inject: [ConfigService],

@@ -9,7 +9,13 @@ export class UsersRepository {
   findById(id: number) {
     return this.prisma.user.findUnique({
       where: { id },
-      select: { id: true, email: true, name: true, createdAt: true, updatedAt: true },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
   }
 
@@ -25,7 +31,13 @@ export class UsersRepository {
     return this.prisma.user.update({
       where: { id },
       data,
-      select: { id: true, email: true, name: true, createdAt: true, updatedAt: true },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
   }
 }
