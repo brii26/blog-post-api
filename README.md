@@ -1,98 +1,207 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# blog-post-api
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A simple blog post REST API built with NestJS, TypeScript, Prisma, and PostgreSQL, with JWT authentication, and end-to-end testing.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## Tech Stack
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+| Technology | Version |
+|---|---|
+| NestJS | ^11.0.1 |
+| TypeScript | ^5.7.3 |
+| Prisma | ^6.19.3 |
+| PostgreSQL | ^16.0 |
+| JWT (`@nestjs/jwt`) | ^11.0.2 |
+| Jest + Supertest | ^30.0.0 |
 
-## Project setup
+---
 
-```bash
-$ pnpm install
+## Data Model
+
+Two related entities with a one-to-many relationship:
+
+```
+User (1) ---< (*) Post
 ```
 
-## Compile and run the project
+**User**
+Stores account credentials and profile.
 
-```bash
-# development
-$ pnpm run start
+**Post**
+Belongs to a User via `authorId` (foreign key). Only the author can update or delete their own posts.
 
-# watch mode
-$ pnpm run start:dev
+---
 
-# production mode
-$ pnpm run start:prod
+## API Endpoints
+
+### Auth
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| POST | `/auth/register` | Public | Register new user |
+| POST | `/auth/login` | Public | Login and get JWT token |
+
+### Posts
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| POST | `/posts` | Required | Create a new post |
+| GET | `/posts` | Required | Get all posts (with author) |
+| GET | `/posts/:id` | Required | Get post detail |
+| PATCH | `/posts/:id` | Required + Owner | Update own post |
+| DELETE | `/posts/:id` | Required + Owner | Delete own post |
+
+### Users
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| GET | `/users/:id` | Required | Get user profile |
+| PATCH | `/users/:id` | Required + Owner | Update own profile |
+
+> Full interactive API documentation available at `http://localhost:3000/api` (Swagger UI) when the app is running.
+
+---
+
+## Project Structure
+
+```
+src/
+├── app.module.ts
+├── main.ts
+├── auth/
+│   ├── dto/
+│   ├── strategies/
+│   ├── auth.controller.ts
+│   ├── auth.service.ts
+│   └── auth.module.ts
+├── posts/
+│   ├── dto/
+│   ├── posts.controller.ts
+│   ├── posts.service.ts
+│   ├── posts.repository.ts
+│   └── posts.module.ts
+├── users/
+│   ├── dto/
+│   ├── users.controller.ts
+│   ├── users.service.ts
+│   ├── users.repository.ts
+│   └── users.module.ts
+├── prisma/
+│   ├── prisma.service.ts
+│   └── prisma.module.ts
+└── common/
+    ├── decorators/
+    │   ├── current-user.decorator.ts
+    │   └── public.decorator.ts
+    └── guards/
+        └── jwt-auth.guard.ts
 ```
 
-## Run tests
+---
 
-```bash
-# unit tests
-$ pnpm run test
+## Design Decisions
 
-# e2e tests
-$ pnpm run test:e2e
+| Decision | Choice | Reason |
+|---|---|---|
+| ORM | Prisma over TypeORM | Better DX, type-safe queries, cleaner schema management |
+| Auth | JWT over Session | Stateless, fits REST principles, scalable |
+| Validation | class-validator | Declarative, integrates natively with NestJS pipes |
+| Testing | Jest + Supertest | Built-in to NestJS, industry standard for e2e |
+| Pattern | Repository Pattern | Separates business logic from data access, making each layer independently testable |
+| Auth Strategy | Global Guard + `@Public()` | Secure by default, all routes protected unless explicitly marked public, reduces risk of accidentally exposing endpoints |
+| API Docs | Swagger (OpenAPI) | Auto-generated from code, interactive UI, always in sync with implementation |
 
-# test coverage
-$ pnpm run test:cov
+### Why Repository Pattern?
+
+The Repository Pattern adds an abstraction layer between the service (business logic) and the database (Prisma). This means:
+
+- **Testability**: Services can be unit tested by mocking the repository, without touching the real database
+- **Single Responsibility**: Services contain only business logic; repositories contain only database queries
+- **Maintainability**: If the ORM changes in the future, only the repository layer needs to be updated, services remain untouched
+
+```
+Controller -> Service (business logic) -> Repository (Prisma queries) -> Database
 ```
 
-## Deployment
+---
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+## How to Run
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### Prerequisites
+- Node.js >= 18
+- pnpm
+- Docker (for PostgreSQL)
 
+### Setup
+
+**1. Clone the repository**
 ```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+git clone https://github.com/brii26/blog-post-api.git
+cd blog-post-api
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+**2. Install dependencies**
+```bash
+pnpm install
+```
 
-## Resources
+**3. Setup environment**
+```bash
+cp .env.example .env
+```
+Open `docker-compose.yml` to find DB credentials (`POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`), then fill in `.env`:
+```dotenv
+DATABASE_URL="postgresql://postgres:password@localhost:5432/blog_post_db"
+JWT_SECRET="secret"
+JWT_EXPIRES_IN="1h"
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+**4. Start PostgreSQL**
+```bash
+docker compose up -d
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+**5. Run database migrations**
+```bash
+pnpm prisma migrate deploy
+```
 
-## Support
+**6. Start the server**
+```bash
+pnpm run start:dev
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+App runs at `http://localhost:3000`
+Swagger docs at `http://localhost:3000/api`
 
-## Stay in touch
+### Run E2E Tests
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Make sure the database container is running using `docker compose up -d`, then:
 
-## License
+```bash
+pnpm run test:e2e
+```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+---
+
+## E2E Test Coverage
+
+Tests are located in `test/` and cover:
+
+**`auth.e2e-spec.ts`**
+- Register, login
+- Duplicate email (409)
+- Invalid email format (400)
+- Wrong password (401)
+- Valid/invalid JWT token (200/401)
+
+**`posts.e2e-spec.ts`**
+- Create post (201), 401 without token, 400 missing title
+- Get all posts (200)
+- Get post detail with author info, 404 not found
+- Update own post (200), 403 if not owner
+- Delete own post (200), 403 if not owner, 404 after deleted
+
+---
+
+## Author
+
+Brian Ricardo Tamin
