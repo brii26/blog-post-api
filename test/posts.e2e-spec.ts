@@ -8,12 +8,12 @@ describe('Posts (e2e)', () => {
   let app: INestApplication<App>;
 
   const userA = {
-    email: `userA@test.com`,
+    email: `e2e-a-${Date.now()}@test.com`,
     password: 'password123',
     name: 'User A',
   };
   const userB = {
-    email: `userB@test.com`,
+    email: `e2e-b-${Date.now()}@test.com`,
     password: 'password123',
     name: 'User B',
   };

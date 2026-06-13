@@ -7,7 +7,7 @@ import { AppModule } from './../src/app.module';
 describe('Auth (e2e)', () => {
   let app: INestApplication<App>;
   const testUser = {
-    email: 'e2e@test.com',
+    email: `e2e-${Date.now()}@test.com`,
     password: 'password123',
     name: 'E2E Test User',
   };
