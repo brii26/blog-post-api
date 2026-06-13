@@ -3,7 +3,7 @@ import {
   ConflictException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { UsersRepository } from '../users/users.repository';
 import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -12,15 +12,13 @@ import * as bcrypt from 'bcrypt';
 @Injectable()
 export class AuthService {
   constructor(
-    private prisma: PrismaService,
+    private usersRepository: UsersRepository,
     private jwtService: JwtService,
   ) {}
 
   async register(dto: RegisterDto) {
     // check user exist in database?
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email: dto.email },
-    });
+    const existingUser = await this.usersRepository.findByEmail(dto.email);
     if (existingUser) {
       throw new ConflictException('Email already registered');
     }
@@ -29,12 +27,10 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(dto.password, 10);
 
     // masuk database
-    const user = await this.prisma.user.create({
-      data: {
+    const user = await this.usersRepository.create({
         email: dto.email,
         password: hashedPassword,
         name: dto.name,
-      },
     });
 
     // exclude password
@@ -44,9 +40,7 @@ export class AuthService {
 
   async login(dto: LoginDto) {
     // ambil user from database
-    const user = await this.prisma.user.findUnique({
-      where: { email: dto.email },
-    });
+    const user = await this.usersRepository.findByEmail(dto.email);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
