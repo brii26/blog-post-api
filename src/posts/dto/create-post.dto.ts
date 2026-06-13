@@ -1,15 +1,14 @@
-import {IsString, IsOptional, IsBoolean} from 'class-validator';
+import { IsString, IsOptional, IsBoolean } from 'class-validator';
 
 export class CreatePostDto {
-	@IsString()
-	title!:string;
+  @IsString()
+  title!: string;
 
-	@IsOptional()
-	@IsString()
-	content?: string;
+  @IsOptional()
+  @IsString()
+  content?: string;
 
-	@IsOptional()
-	@IsBoolean()
-	published?: boolean;
-
+  @IsOptional()
+  @IsBoolean()
+  published?: boolean;
 }
