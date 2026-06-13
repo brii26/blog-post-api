@@ -1,5 +1,5 @@
 task.md
-/generated/prisma
+/generated
 node_modules
 dist/
 .env
